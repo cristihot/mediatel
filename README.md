@@ -1,0 +1,1 @@
+Parsare Powershell pentru mediatel.
