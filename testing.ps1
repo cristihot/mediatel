@@ -5,6 +5,7 @@ Clear-Host
 $input = @()
 #$input = import-csv -Path $fileName -Delimiter ';'
 
+$input = import-csv -Path "D:\Kris\PowerShell\!! PROIECTE !!\mediatel\raport_transferate2.csv" -Delimiter ';'
 $input = import-csv -Path "c:\Kris\PowerShell\mediatel\raport_transferate2.csv" -Delimiter ';'
 
 # Write-Host -NoNewline -ForegroundColor Yellow 'Procesare fisier CSV.....'
@@ -72,7 +73,7 @@ for($x = 0; $x -lt $arraySplit.Count; $x++){
   
 }
 
-
+$arrayFinal | Format-Table -AutoSize
 
 
 break
