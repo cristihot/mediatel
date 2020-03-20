@@ -61,6 +61,7 @@ for($x = 0; $x -lt $arraySplit.Count; $x++){
       $coloane | Add-Member -MemberType NoteProperty -Name "Linia" -Value $x
       Write-Host $splitAgenti[$y].TRIM() "-->" $splitTime[$y].TRIM()
       $arrayFinal += $coloane
+      
     }
   }
 
