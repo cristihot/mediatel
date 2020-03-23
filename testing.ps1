@@ -5,8 +5,8 @@ Clear-Host
 $input = @()
 #$input = import-csv -Path $fileName -Delimiter ';'
 
-$input = import-csv -Path "D:\Kris\PowerShell\!! PROIECTE !!\mediatel\raport_transferate2.csv" -Delimiter ';'
-#$input = import-csv -Path "c:\Kris\PowerShell\mediatel\raport_transferate2.csv" -Delimiter ';'
+#$input = import-csv -Path "D:\Kris\PowerShell\!! PROIECTE !!\mediatel\raport_transferate2.csv" -Delimiter ';'
+$input = import-csv -Path "c:\Kris\PowerShell\mediatel\raport_transferate2.csv" -Delimiter ';'
 
 # Write-Host -NoNewline -ForegroundColor Yellow 'Procesare fisier CSV.....'
 
@@ -34,6 +34,7 @@ foreach ($inputrow in $input) {
 
 }
 
+
 Write-Host "`n"
 
 $arraySplit = @();
@@ -49,58 +50,66 @@ foreach ($rand in $input) {
   $arraySplit += $dataTable
 }
 
-#$arraySplit | Format-Table -AutoSize
+$arraySplit | Format-Table -AutoSize
 
-# for($x = 0; $x -lt $arraySplit.Count; $x++){
-#   $splitAgenti = $arraySplit.Agenti[$x] -split ','
-#   $splitTime   = $arraySplit.TalkTime[$x] -split ','
+#foreach ($row in $arraySplit)
+#{
+#	foreach ($talkTimeRow in $row.TalkTime)
+#	{
+#		$splitTalkTimeRow = $talkTimeRow -split ','
+#		for ($a = 0; $a -lt $splitTalkTimeRow.Count; $a++)
+#		{
+#			if ($splitTalkTimeRow[$a].Trim() -ne 0)
+#			{
+#				Write-Host $splitTalkTimeRow[$a].Trim()
+#			}
+#		}
+#	}
+#}
 
-#   for($y = 0; $y -lt $splitAgenti.Count; $y++) {
-#     if($splitTime[$y].TRIM() -ne 0) {
-#       $coloane = New-Object -TypeName PSObject
-#       $coloane | Add-Member -MemberType NoteProperty -Name "Linia" -Value $x
-#       Write-Host $splitAgenti[$y].TRIM() "-->" $splitTime[$y].TRIM()
-#       $arrayFinal += $coloane
+for ($rowInArray = 0; $rowInArray -lt $arraySplit.Count; $rowInArray++)
+{
+	$splitAgentsRow	  = $arraySplit.Agenti[$rowInArray] -split ','
+	$splitTalkTimeRow = $arraySplit.TalkTime[$rowInArray] -split ','
+	for ($checkTalkValue = 0; $checkTalkValue -lt $splitTalkTimeRow.Count; $checkTalkValue++)
+	{
+		if ($splitTalkTimeRow[$checkTalkValue].Trim() -ne 0)
+		{
+			Write-Host $splitAgentsRow[$checkTalkValue].Trim()
+			Write-Host $splitTalkTimeRow[$checkTalkValue].Trim()
+		}
+	}
+	Write-Host "****************************"
+	#Write-Host $splitTalkTimeRow.Trim()
+	#Write-Host $arraySplit.TalkTime[$rowInArray]	
+}
 
-#     }
-#   }
-
-#   # foreach($inputrow in $splitTime) {
-#   #   if($inputrow.TRIM() -ne 0) {
-#   #     Write-Host $inputrow.TRIM()
-#   #   }
-#   # }
-#   Write-Host "*******************************"
-  
-# }
-
-# $arrayFinal | Format-Table -AutoSize
-
+Write-Host "`n"
+break
 
 $arrayGugu = @()
 
 for($x=0; $x -lt $arraySplit.Count; $x++) {
   $splitAgenti = $arraySplit.Agenti[$x] -split ','
   $splitTime   = $arraySplit.TalkTime[$x] -split ','
+  #Write-Host $splitAgenti.Count
   #Write-Host "Linia$($x) --> $($splitAgenti)"
-  for($y=0; $y -lt $splitAgenti[$x].Count; $y++) {
+  for($y=0; $y -lt $splitAgenti.Count; $y++) {
     $agent = $splitAgenti[$y].TRIM()
-    #Write-Host $agent
     $coloane = New-Object -TypeName PSObject
     $coloane | Add-Member -MemberType NoteProperty -Name "Coloana$($y)" -Value $agent
-    
+    Write-Host $agent
+    $arrayGugu += $coloane
   }
-  $arrayGugu += $coloane
+  
 }
 
-$arrayGugu | Format-Table -AutoSize
+#$arrayGugu | Format-Table -AutoSize
 
-Write-Host "Done"
-
+#Write-Host "Done"
 
 
 break
-
 
 
 
