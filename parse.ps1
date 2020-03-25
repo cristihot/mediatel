@@ -2,29 +2,13 @@ Add-Type -AssemblyName System.Windows.Forms
 
 Clear-Host
 
-#$FileBrowser = New-Object -TypeName System.Windows.Forms.OpenFileDialog -Property @{
-#    InitialDirectory = ('D:\Kris\mediatel\') # pentru selectie default la Desktop = [Environment]::GetFolderPath('Desktop')
-#    Filter = 'Fisier tip (*.csv)|*.csv'
-#}
-
-#$null = $FileBrowser.ShowDialog()
-
-#$fileName = $FileBrowser.FileName
-#$initialFolder = $FileBrowser.InitialDirectory
-
-#if($fileName -eq $null) {
-#    Write-Host "Nu ai selectat fisierul de procesat!" -ForegroundColor Red
-#    #$raspuns = Read-Host
-#    break
-#}
-
-
 $input = @()
 #$input = import-csv -Path $fileName -Delimiter ';'
 
-$input = import-csv -Path "c:\Kris\PowerShell\mediatel\raport_transferate2.csv" -Delimiter ';'
+$input = import-csv -Path "d:\Projects\Powershell\mediatel\raport_transferate2.csv" -Delimiter ';'
+#$input = import-csv -Path "c:\Kris\PowerShell\mediatel\raport_transferate2.csv" -Delimiter ';'
 
-Write-Host -NoNewline -ForegroundColor Yellow 'Procesare fisier CSV.....'
+# Write-Host -NoNewline -ForegroundColor Yellow 'Procesare fisier CSV.....'
 
 $nrColoaneAgent    = 0
 $nrColoaneDomeniu  = 0
@@ -37,7 +21,7 @@ foreach ($inputrow in $input) {
   $inputDomeniu  = $inputrow.Domeniu  -split ','
   $inputTalkTime = $inputrow.TalkTime -split ','
   $inputCallCode = $inputrow.Callcode -split ','
-
+  
   $nrAgent    = $inputAgent.Count
   $nrDomeniu  = $inputDomeniu.Count
   $nrTalkTime = $inputTalkTime.Count
@@ -50,18 +34,86 @@ foreach ($inputrow in $input) {
 
 }
 
+
+Clear-Host
+
+$arrayId =@()
+$row = New-Object -TypeName PSObject
+
+Write-host "Nr linii in fisier: $($input.Count)"
+Write-host "Nr array in TalkTime: $($input.TalkTime)"
+
+for($l = 0; $l -lt $input.Count; $l++) {
+    for($a = 0; $a -lt $input.TalkTime[$l].Count; $a++) {
+        $valoareAgent = $input.Agents[$a] -split ','
+        $row | Add-Member -MemberType NoteProperty -Name "Agent$($a+1)" -Value $valoareAgent -Force
+        $arrayId += $row
+    }
+}
+
+$arrayId | Format-Table
+
+break
+
+$arrayId =@()
+$row = New-Object -TypeName PSObject
+
+for($a = 0; $a -lt $inputTalkTime.Count; $a++) {
+    $valoareAgent = $input.Agents[$a] -split ','
+
+    $row | Add-Member -MemberType NoteProperty -Name "Agent$($a+1)" -Value $valoareAgent
+    $arrayId += $row
+}
+
+
+$arrayId | Format-Table -AutoSize
+
+break
+
+
+$row = New-Object -TypeName PSObject
+for($c = 0; $c -lt $nrColoaneAgent; $c++) {
+    $row | Add-Member -MemberType NoteProperty -Name "Agent$($c+1)" -Value $($c+1)
+    $arrayId += $row
+}
+
+$arrayId | Format-Table -AutoSize
+
+break
+
+foreach ($inputrow in $input) {
+  $inputAgent    = $inputrow.Agents -split ','
+  $inputTalkTime = $inputrow.TalkTime -split ','
+
+  $coloane = New-Object -TypeName PSObject
+
+  for($a = 0; $a -lt $inputTalkTime.Count; $a++) {
+    for($c = 0; $c -lt $nrColoaneAgent; $c++) {
+        if($inputTalkTime[$a].TRIM() -ne 0) {
+            $coloane | Add-Member -MemberType NoteProperty -Name "Agent$($c+1)" -Value $inputAgent[$a].TRIM() -Force
+            $arrayId += $coloane
+        } else {
+            $coloane | Add-Member -MemberType NoteProperty -Name "Agent$($c+1)" -Value "" -Force
+            $arrayId += $coloane
+        }
+    } 
+  }
+} 
+
+$arrayId | Format-Table -AutoSize
+
+#Write-Host $nrColoaneCallCode
+
+
 Write-Host "`n"
 
-#Write-Host "Numar max col agent: $nrColoaneAgent"
-#Write-Host "Numar max col domeniu: $nrColoaneDomeniu"
-#Write-Host "Numar max col TalkTime: $nrColoaneTalkTime"
-#Write-Host "Numar max col CallCode: $nrColoaneCallCode"
+break
 
 $arraySplit = @();
 
 foreach ($rand in $input) {
-  $agenti = $rand.Agents #-split ','
-  $talkTime = $rand.TalkTime #-split ','
+  $agenti = $rand.Agents
+  $talkTime = $rand.TalkTime
 
   $dataTable = New-Object -TypeName PSObject
   $dataTable | Add-Member -MemberType NoteProperty -Name "Agenti" -Value $agenti
@@ -70,7 +122,70 @@ foreach ($rand in $input) {
   $arraySplit += $dataTable
 }
 
-$arrayFinal = @()
+$arraySplit | Format-Table -AutoSize
+
+
+for ($rowInArray = 0; $rowInArray -lt $arraySplit.Count; $rowInArray++)
+{
+	$splitAgentsRow	  = $arraySplit.Agenti[$rowInArray] -split ','
+	$splitTalkTimeRow = $arraySplit.TalkTime[$rowInArray] -split ','
+	for ($checkTalkValue = 0; $checkTalkValue -lt $splitTalkTimeRow.Count; $checkTalkValue++)
+	{
+		if ($splitTalkTimeRow[$checkTalkValue].Trim() -ne 0)
+		{
+			Write-Host $splitAgentsRow[$checkTalkValue].Trim()
+			Write-Host $splitTalkTimeRow[$checkTalkValue].Trim()
+		}
+	}
+	Write-Host "****************************"
+	#Write-Host $splitTalkTimeRow.Trim()
+	#Write-Host $arraySplit.TalkTime[$rowInArray]
+}
+
+Write-Host "`n"
+break
+
+$arrayGugu = @()
+
+for($x=0; $x -lt $arraySplit.Count; $x++) {
+  $splitAgenti = $arraySplit.Agenti[$x] -split ','
+  $splitTime   = $arraySplit.TalkTime[$x] -split ','
+  #Write-Host $splitAgenti.Count
+  #Write-Host "Linia$($x) --> $($splitAgenti)"
+  for($y=0; $y -lt $splitAgenti.Count; $y++) {
+    $agent = $splitAgenti[$y].TRIM()
+    $coloane = New-Object -TypeName PSObject
+    $coloane | Add-Member -MemberType NoteProperty -Name "Coloana$($y)" -Value $agent
+    Write-Host $agent
+    $arrayGugu += $coloane
+  }
+
+}
+
+#$arrayGugu | Format-Table -AutoSize
+
+#Write-Host "Done"
+
+
+break
+
+
+
+for($x=0; $x -lt $arraySplit.Count; $x++) {
+  $splitAgenti = $arraySplit.Agenti[$x] -split ','
+  $splitTime   = $arraySplit.TalkTime[$x] -split ','
+  for($y=0; $y -lt $splitAgenti[$x].Count; $y++) {
+    $sender   = $splitAgenti[$y].TRIM()
+    #$reciever = $splitTime[$y].TRIM()
+    $coloane  = New-Object -TypeName PSObject
+    $coloane | Add-Member -MemberType NoteProperty -Name "Sender($y)" -Value $sender
+  }
+  $arrayFinal += $coloane
+}
+
+$arrayFinal | Format-Table -AutoSize
+
+break
 
 for($x=0; $x -lt $arraySplit.Count; $x++) {
   $splitAgenti = $arraySplit.Agenti[$x] -split ','
@@ -79,87 +194,14 @@ for($x=0; $x -lt $arraySplit.Count; $x++) {
     if($splitTime[$y].TRIM() -ne 0) {
       $sender   = $splitAgenti[$y].TRIM()
       $reciever = $splitTime[$y].TRIM()
-      #Write-Host "Linia$($x): $($splitAgenti[$y].TRIM())-->$($splitTime[$y].TRIM())"
-      $coloane = New-Object -TypeName PSObject
+      $coloane  = New-Object -TypeName PSObject
       $coloane | Add-Member -MemberType NoteProperty -Name "Linia" -Value $x
       $coloane | Add-Member -MemberType NoteProperty -Name "Sender" -Value $sender
       $coloane | Add-Member -MemberType NoteProperty -Name "Time" -Value $reciever
       $arrayFinal += $coloane
     }
   }
-  #Write-Host $arraySplit.Agenti[$x]
 }
+
 
 $arrayFinal | Format-Table -AutoSize
-
-
-
-
-break
-
-
-
-output = @()
-
-foreach ($inputrow in $input) {
-  $C1 = $inputrow.Calltraceid
-  $C2 = $inputrow.DNIS
-  $C3 = $inputrow.ANI
-  $C4 = $inputrow.Date
-  $C5 = $inputrow.Time
-  $C6 = $inputrow.Calltype
-  $C7 = $inputrow.ClientName
-  $C8 = $inputrow.ClientID
-  $inputAgent    = $inputrow.Agents   -split ','
-  $inputDomeniu  = $inputrow.Domeniu  -split ','
-  $inputTalkTime = $inputrow.TalkTime -split ','
-  $inputCallCode = $inputrow.Callcode -split ','
-
-  $coloane = New-Object -TypeName PSObject
-
-  $coloane | Add-Member -MemberType NoteProperty -Name "Calltraceid" -Value $C1
-  $coloane | Add-Member -MemberType NoteProperty -Name "DNIS" -Value $C2
-  $coloane | Add-Member -MemberType NoteProperty -Name "ANI" -Value $C3
-  $coloane | Add-Member -MemberType NoteProperty -Name "Date" -Value $C4
-  $coloane | Add-Member -MemberType NoteProperty -Name "Time" -Value $C5
-  $coloane | Add-Member -MemberType NoteProperty -Name "Calltype" -Value $C6
-  $coloane | Add-Member -MemberType NoteProperty -Name "ClientName" -Value $C7
-  $coloane | Add-Member -MemberType NoteProperty -Name "ClientID" -Value $C8
-
-  ######## Agent ########
-  For ($i=0; $i -lt $nrColoaneAgent; $i++){
-    $coloane | Add-Member -MemberType NoteProperty -Name "Agent$($i+1)" -Value $inputAgent[$i]
-  }
-
-  ######## Domeniu ########
-  For ($i=0; $i -lt $nrColoaneDomeniu; $i++){
-    $coloane | Add-Member -MemberType NoteProperty -Name "Domeniu$($i+1)" -Value $inputDomeniu[$i]
-  }
-
-  ######## TalkTime ########
-  For ($i=0; $i -lt $nrColoaneTalkTime; $i++){
-    $coloane | Add-Member -MemberType NoteProperty -Name "TalkTime$($i+1)" -Value $inputTalkTime[$i]
-  }
-
-  ######## CallCode ########
-  For ($i=0; $i -lt $nrColoaneCallCode; $i++){
-    $coloane | Add-Member -MemberType NoteProperty -Name "CallCode$($i+1)" -Value $inputCallCode[$i]
-  }
-
-  $output += $coloane
-
-
-}
-
-Write-Host -ForegroundColor Green 'OK'
-
-$FileSave = New-Object -TypeName System.Windows.Forms.SaveFileDialog -Property @{
-    InitialDirectory = ($initialFolder) # pentru selectie default la Desktop = [Environment]::GetFolderPath('Desktop')
-    Filter = 'Fisier tip (*.csv)|*.csv'
-}
-
-$null = $FileSave.ShowDialog()
-
-#$output | Export-Csv -NoTypeInformation -Path "$initialFolder\export.csv"
-
-$output | Export-Csv -NoTypeInformation -Path $FileSave.FileName
